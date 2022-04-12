@@ -5,6 +5,7 @@ import pandas as pd
 from bleak import BleakClient
 import io
 import time
+import datetime
 
 FILENAME = "./output.xlsx"
 address = (
@@ -46,16 +47,13 @@ def callback(sender: int, data: bytearray):
     # for i in range(1,9):
     if lenlist > 1:
         if datastring[0:2] in errlist:
-            # print(datastring[0:2])
-            # lenlist = len(stringpressPoints)
-            #if i == 0:
             if datastring == errlist[0]:
-                #print(datastring)
                 if stringpressPoints[lenlist - 2][0:2] != errlist[9]:
                     print('value to be replaced: ')
                     print(stringpressPoints[lenlist - 2])
-                    stringpressPoints.insert(lenlist- 1,'0')
-            for i in range(1,9):
+                    newstring = errlist[9] + ' 0'
+                    stringpressPoints.insert(lenlist- 1, newstring)
+            for i in range(1,10):
                 if datastring[0:2] == errlist[i]:
                    # print(errlist[i])
                     if stringpressPoints[lenlist -2][0:2] != errlist[i-1]:
@@ -65,7 +63,8 @@ def callback(sender: int, data: bytearray):
                         print(stringpressPoints[lenlist - 2])
                         print(stringpressPoints[lenlist -1])
                         print(datastring)
-                        stringpressPoints.insert(lenlist - 1 ,'0')
+                        newstring = errlist[i-1] + ' 0'
+                        stringpressPoints.insert(lenlist - 1 , newstring)
 
 
 async def main(address):
@@ -80,7 +79,8 @@ async def main(address):
         list_end = buflen * 10
         while lenlist < list_end:
             await client.read_gatt_char(TX_UUID)
-            print(lenlist)
+            if lenlist > 0:
+                print(lenlist)
           #  points = points + 1
            # print("-")
 
@@ -103,9 +103,13 @@ async def main(address):
         print(finallist)
         df = pd.DataFrame(finallist, columns=['Del', 'time', 'chanel 0', 'channel 1', 'channel 2', 'channel 3', 'channel 4', 'channel 5', 'channel 6', 'channel 7'])
 
+        x = datetime.datetime.now()
+        date = str(x.date())
+        time = str(x.time())
+        filename = str('SmartSole' + date + '_' + time[0:2] + 'h' + time[3:5] + 'm.csv')
 
         print(df)
-        df.to_csv('noweight.csv')
+        df.to_csv(filename)
 
 
 

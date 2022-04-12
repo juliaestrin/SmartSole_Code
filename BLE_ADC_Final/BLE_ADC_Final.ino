@@ -19,6 +19,9 @@
 
 BLEUart bleuart; // uart over ble
 
+int LED = PIN_D17; 
+int BUTTON = PIN_D15;
+
 int adc0 = A0; 
 int adc1 = A1;
 int adc2 = A2;
@@ -40,15 +43,16 @@ int adc7value = 0;
 int i = 0; 
 int divider = 11; 
 
-const int buflen = 666; 
+const int buflen = 300; 
 
-int adcbuffer[buflen][10]; 
+int adcbuffer[buflen][10];
 char result[10]; 
 
 unsigned long starttime; 
 unsigned long currenttime[buflen]; 
 
 bool startadc = false; 
+bool ledsignal = false; 
 int ButtonState;
 
 
@@ -68,6 +72,11 @@ void setup() {
   pinMode(LED_PIN, OUTPUT); // Turn on-board blue LED off
   digitalWrite(LED_PIN, LED_OFF);
   pinMode(BUTTON_PIN, INPUT);
+
+  pinMode(LED, OUTPUT);
+  pinMode(BUTTON, INPUT);
+
+  digitalWrite(LED,LOW); 
 
   // Uncomment the code below to disable sharing
   // the connection LED on pin 7.
@@ -126,6 +135,7 @@ void connect_callback(uint16_t conn_handle)
 }
 
 void printBuffer(){
+  Serial.println("Send Buffer"); 
   for (int j = 0; j < i; j++){
     for (int h = 0; h < 10; h++){ 
      // Serial.println(adcbuffer[j][h]);
@@ -153,7 +163,10 @@ void startTest(){
   ButtonState = digitalRead(BUTTON_PIN); 
   if (ButtonState == 0 && lastButtonState == 1 && startadc == 0){
     startadc = 1; 
-    Serial.println("Write to ADC");  
+    ledsignal = 1; 
+    Serial.println("Reading Sensors"); 
+    //bleuart.write("Test Starting"); 
+    //bleuart.flushTXD(); 
   }
   lastButtonState = ButtonState;  
 }
@@ -162,10 +175,17 @@ void startTest(){
 
 void loop() {
 
-  Serial.println(startadc); 
+  //Serial.println(startadc); 
 
     if (startadc == 0){
       startTest(); 
+    }
+
+    if (ledsignal == 1){
+      digitalWrite(LED,HIGH); 
+    }
+    else{
+      digitalWrite(LED, LOW); 
     }
   
 
@@ -196,9 +216,12 @@ void loop() {
     i++;  
   
     if (i == (buflen)) {
-      Serial.println("Send Buffer"); 
+      ledsignal = 0; 
+      //bleuart.write("Sending Data"); 
+      //bleuart.flushTXD();
       printBuffer();
-     // startadc = 0; 
+      startadc = 0;
+       
       i = 0; 
     }
     delay(30); 
