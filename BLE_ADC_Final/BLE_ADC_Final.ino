@@ -43,7 +43,7 @@ int adc7value = 0;
 int i = 0; 
 int divider = 11; 
 
-const int buflen = 300; 
+const int buflen = 400; 
 
 int adcbuffer[buflen][10];
 char result[10]; 
@@ -51,8 +51,8 @@ char result[10];
 unsigned long starttime; 
 unsigned long currenttime[buflen]; 
 
-bool startadc = false; 
-bool ledsignal = false; 
+bool startadc = LOW; 
+bool ledsignal = LOW; 
 int ButtonState;
 
 
@@ -135,7 +135,7 @@ void connect_callback(uint16_t conn_handle)
 }
 
 void printBuffer(){
-  Serial.println("Send Buffer"); 
+  //Serial.println("Send Buffer"); 
   for (int j = 0; j < i; j++){
     for (int h = 0; h < 10; h++){ 
      // Serial.println(adcbuffer[j][h]);
@@ -160,8 +160,10 @@ void printBuffer(){
 }
 
 void startTest(){
-  ButtonState = digitalRead(BUTTON_PIN); 
-  if (ButtonState == 0 && lastButtonState == 1 && startadc == 0){
+  ButtonState = digitalRead(BUTTON); 
+  //Serial.println(ButtonState); 
+  // if (ButtonState == 0 && lastButtonState == 1 && startadc == 0){ 
+  if (ButtonState == 1 && lastButtonState == 0 && startadc == 0){ 
     startadc = 1; 
     ledsignal = 1; 
     Serial.println("Reading Sensors"); 
@@ -174,22 +176,25 @@ void startTest(){
 
 
 void loop() {
-
+  
   //Serial.println(startadc); 
+  //ButtonState = digitalRead(BUTTON); 
+  //Serial.println(ButtonState); 
 
     if (startadc == 0){
       startTest(); 
     }
 
-    if (ledsignal == 1){
-      digitalWrite(LED,HIGH); 
-    }
-    else{
-      digitalWrite(LED, LOW); 
-    }
-  
+//    if (ledsignal == 1){
+//      digitalWrite(LED,HIGH); 
+//    }
+//    else{
+//      digitalWrite(LED, LOW); 
+//    }
+//  
 
   if (startadc == 1){
+    digitalWrite(LED, HIGH); 
     //Serial.print("write to ADC"); 
     // Get a fresh ADC value
     adc0value = analogRead(adc0);
@@ -216,9 +221,8 @@ void loop() {
     i++;  
   
     if (i == (buflen)) {
-      ledsignal = 0; 
-      //bleuart.write("Sending Data"); 
-      //bleuart.flushTXD();
+      digitalWrite(LED, LOW); \
+      Serial.println("Send Buffer"); 
       printBuffer();
       startadc = 0;
        

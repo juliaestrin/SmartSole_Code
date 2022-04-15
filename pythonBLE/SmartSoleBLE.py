@@ -12,8 +12,8 @@ pd.options.mode.chained_assignment = None
 
 FILENAME = "./output.xlsx"
 address = (
-    "CA:EE:38:A5:33:4E"
-    #"DA:D3:CD:7E:F0:A8"
+   #  "CA:EE:38:A5:33:4E"
+    "DA:D3:CD:7E:F0:A8"
     # "EC:54:1B:8A:8C:6B"
     # "C8:14:2A:19:65:5F"
     # "E6:94:DD:E9:72:E9"
@@ -28,7 +28,7 @@ TX_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 pressPoints = []
 stringpressPoints = []
 lenlist = 0
-buflen = 300
+buflen = 400
 # f = io.open("test.txt", mode="w", encoding="utf-8")
 
 def callback(sender: int, data: bytearray):
@@ -174,6 +174,7 @@ async def main(address):
                 break
         # print(first)
         # print(last)
+        step_time = (data['time'][last] - data['time'][first])/1000
 
         drange = (last + 1) - first
         div1 = math.ceil(drange / 3)
@@ -195,7 +196,7 @@ async def main(address):
             final[x].append(((sum(needed[x][div1 + div2:div1 + div2 + div3])) / div3))
         # print(final)
 
-        send = pd.DataFrame(columns=['x', 'y', 'd', 'r'])
+        send = pd.DataFrame(columns=['x', 'y', 'd', 'r', 't'])
         send['x'] = [170, 90, 180, 80, 150, 80, 120, 350, 420, 350, 420, 380, 420, 390,
                      170, 90, 180, 80, 150, 80, 120, 350, 420, 350, 420, 380, 420, 390,
                      170, 90, 180, 80, 150, 80, 120, 350, 420, 350, 420, 380, 420, 390]
@@ -203,6 +204,7 @@ async def main(address):
                      60, 120, 200, 270, 350, 420, 510, 60, 120, 200, 270, 350, 420, 510,
                      60, 120, 200, 270, 350, 420, 510, 60, 120, 200, 270, 350, 420, 510]
 
+        send['t'] = pd.Series([totaltime, step_time])
         # print(send)
 
         # set values according to their property
@@ -252,7 +254,7 @@ async def main(address):
 
         print(send)
 
-        send.to_csv("finaltest_1.csv")
+        send.to_csv("finaltest_JULIAVIDEO.csv")
 
         '''
         calc the total number of steps using the example step
